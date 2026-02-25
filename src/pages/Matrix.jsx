@@ -7,189 +7,206 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
+  ReferenceLine,
 } from "recharts"
 
 export default function Matrix() {
-  const [impact, setImpact] = useState(7)
-  const [complexity, setComplexity] = useState(3)
+  const [projects, setProjects] = useState([
+    { id: 1, name: "Robot Loading", impact: 8, complexity: 3 },
+    { id: 2, name: "Vision Inspection", impact: 6, complexity: 7 },
+  ])
+แส
+  const [newProject, setNewProject] = useState({
+    name: "",
+    impact: 5,
+    complexity: 5,
+  })
 
-  const data = [{ x: complexity, y: impact }]
+  const addProject = () => {
+    if (!newProject.name.trim()) return
 
-  const getZone = () => {
-    if (impact >= 5 && complexity <= 5)
-      return { title: "Quick Win", color: "text-emerald-600" }
+    const newItem = {
+      id: Date.now(),
+      ...newProject,
+    }
 
-    if (impact >= 5 && complexity > 5)
-      return { title: "Strategic Project", color: "text-blue-600" }
-
-    if (impact < 5 && complexity <= 5)
-      return { title: "Improve First", color: "text-amber-600" }
-
-    return { title: "Don't Touch", color: "text-red-600" }
+    setProjects([...projects, newItem])
+    setNewProject({ name: "", impact: 5, complexity: 5 })
   }
 
-  const zone = getZone()
+  const deleteProject = (id) => {
+    setProjects(projects.filter((p) => p.id !== id))
+  }
+
+  const updateProject = (id, field, value) => {
+    setProjects(
+      projects.map((p) =>
+        p.id === id ? { ...p, [field]: value } : p
+      )
+    )
+  }
+
+  const chartData = projects.map((p) => ({
+    x: p.complexity,
+    y: p.impact,
+    name: p.name,
+  }))
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-10 space-y-10">
-      
-      {/* Title */}
+    <div className="min-h-screen bg-slate-50 p-10 space-y-10">
+
       <div>
         <h2 className="text-3xl font-bold">
-          Automation Selection Matrix
+          Automation Portfolio Matrix
         </h2>
-        <p className="text-slate-500 mt-2">
-          Evaluate project priority based on impact and complexity
-        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-        {/* LEFT CONTROL CARD */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-8">
-          
+        {/* LEFT PANEL */}
+        <div className="bg-white p-6 rounded-2xl shadow border space-y-6">
+
+          <h3 className="font-semibold text-lg">Add New Project</h3>
+
+          <input
+            type="text"
+            placeholder="Project Name"
+            value={newProject.name}
+            onChange={(e) =>
+              setNewProject({ ...newProject, name: e.target.value })
+            }
+            className="w-full border rounded-xl p-3"
+          />
+
           <div>
-            <label className="block text-sm font-medium text-slate-600">
-              Impact (Business Benefit)
-            </label>
+            <label>Impact: {newProject.impact}</label>
             <input
               type="range"
               min="1"
               max="10"
-              value={impact}
-              onChange={(e) => setImpact(+e.target.value)}
-              className="w-full mt-3"
+              value={newProject.impact}
+              onChange={(e) =>
+                setNewProject({
+                  ...newProject,
+                  impact: +e.target.value,
+                })
+              }
+              className="w-full"
             />
-            <p className="text-sm mt-2 text-slate-500">
-              Value: {impact}
-            </p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-600">
-              Complexity (Technical Difficulty)
-            </label>
+            <label>Complexity: {newProject.complexity}</label>
             <input
               type="range"
               min="1"
               max="10"
-              value={complexity}
-              onChange={(e) => setComplexity(+e.target.value)}
-              className="w-full mt-3"
+              value={newProject.complexity}
+              onChange={(e) =>
+                setNewProject({
+                  ...newProject,
+                  complexity: +e.target.value,
+                })
+              }
+              className="w-full"
             />
-            <p className="text-sm mt-2 text-slate-500">
-              Value: {complexity}
-            </p>
           </div>
 
-          <div className="pt-4 border-t border-slate-200">
-            <p className="text-sm text-slate-500">
-              Recommendation
-            </p>
-            <p className={`text-2xl font-bold mt-1 ${zone.color}`}>
-              {zone.title}
-            </p>
+          <button
+            onClick={addProject}
+            className="w-full bg-slate-900 text-white py-3 rounded-xl"
+          >
+            Add Project
+          </button>
+
+          <div className="pt-4 border-t space-y-4">
+            <h4 className="font-semibold">Current Projects</h4>
+
+            {projects.map((p) => (
+              <div
+                key={p.id}
+                className="border p-3 rounded-xl space-y-2"
+              >
+                <input
+                  type="text"
+                  value={p.name}
+                  onChange={(e) =>
+                    updateProject(p.id, "name", e.target.value)
+                  }
+                  className="w-full border rounded p-2"
+                />
+
+                <div className="text-sm">
+                  Impact: {p.impact}
+                </div>
+                <input
+                  type="range"
+                  min="1"
+                  max="10"
+                  value={p.impact}
+                  onChange={(e) =>
+                    updateProject(
+                      p.id,
+                      "impact",
+                      +e.target.value
+                    )
+                  }
+                  className="w-full"
+                />
+
+                <div className="text-sm">
+                  Complexity: {p.complexity}
+                </div>
+                <input
+                  type="range"
+                  min="1"
+                  max="10"
+                  value={p.complexity}
+                  onChange={(e) =>
+                    updateProject(
+                      p.id,
+                      "complexity",
+                      +e.target.value
+                    )
+                  }
+                  className="w-full"
+                />
+
+                <button
+                  onClick={() => deleteProject(p.id)}
+                  className="w-full bg-red-500 text-white py-2 rounded"
+                >
+                  Delete
+                </button>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* RIGHT MATRIX CARD */}
-        <div className="lg:col-span-2 bg-white p-8 rounded-2xl shadow-lg border border-slate-200 relative">
+        {/* RIGHT MATRIX */}
+        <div className="lg:col-span-2 bg-white p-8 rounded-2xl shadow border">
 
-          {/* Quadrant Labels */}
-          <div className="absolute top-6 left-10 text-emerald-600 font-semibold text-sm">
-            Quick Win
-          </div>
+          <ResponsiveContainer width="100%" height={450}>
+            <ScatterChart>
 
-          <div className="absolute top-6 right-10 text-blue-600 font-semibold text-sm">
-            Strategic
-          </div>
+              <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+              <XAxis type="number" dataKey="x" domain={[0, 10]} />
+              <YAxis type="number" dataKey="y" domain={[0, 10]} />
 
-          <div className="absolute bottom-10 left-10 text-amber-600 font-semibold text-sm">
-            Improve
-          </div>
+              <ReferenceLine x={5} stroke="#94a3b8" />
+              <ReferenceLine y={5} stroke="#94a3b8" />
 
-          <div className="absolute bottom-10 right-10 text-red-600 font-semibold text-sm">
-            Don't Touch
-          </div>
-
-          <ResponsiveContainer width="100%" height={420}>
-            <ScatterChart margin={{ top: 40, right: 40, bottom: 40, left: 40 }}>
-
-              <CartesianGrid stroke="#e2e8f0" />
-
-              <XAxis
-                type="number"
-                dataKey="x"
-                domain={[0, 10]}
-                tick={{ fill: "#64748b" }}
-                label={{
-                  value: "Complexity",
-                  position: "insideBottom",
-                  offset: -15,
-                }}
-              />
-
-              <YAxis
-                type="number"
-                dataKey="y"
-                domain={[0, 10]}
-                tick={{ fill: "#64748b" }}
-                label={{
-                  value: "Impact",
-                  angle: -90,
-                  position: "insideLeft",
-                }}
-              />
-
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#ffffff",
-                  borderRadius: "12px",
-                  border: "1px solid #e2e8f0",
-                }}
-                formatter={(value, name) => [
-                  value,
-                  name === "x" ? "Complexity" : "Impact",
-                ]}
-              />
-
-              {/* Divider Lines */}
-              <Scatter
-                data={[
-                  { x: 5, y: 0 },
-                  { x: 5, y: 10 },
-                ]}
-                line
-                fill="transparent"
-              />
+              <Tooltip />
 
               <Scatter
-                data={[
-                  { x: 0, y: 5 },
-                  { x: 10, y: 5 },
-                ]}
-                line
-                fill="transparent"
-              />
-
-              {/* Main Dot */}
-              <Scatter
-                data={data}
-                shape={(props) => (
-                  <circle
-                    cx={props.cx}
-                    cy={props.cy}
-                    r={12}
-                    fill="#0f172a"
-                  />
-                )}
+                data={chartData}
+                fill="#0f172a"
               />
 
             </ScatterChart>
           </ResponsiveContainer>
 
         </div>
-
       </div>
     </div>
   )
